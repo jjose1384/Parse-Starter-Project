@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\exploded-aar\com.android.support\design\22.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="1821601ddbec5ff125653097812823388700af74">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\classes-98be3b4cdf3652cbda9fe18fce2361aaa498011f.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\exploded-aar\com.splitwise\tokenautocomplete\2.0.2\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c3e52d6f4535aef3a57701a0f6237f4bbf679b33">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\classes-297d064101fc4cdacd50146de06a37dbdbbf9a63.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\.gradle\caches\modules-2\files-2.1\com.parse\parse-android\1.10.2\2eaa8b8ca97c915eab3883bab40e15611e5e0393\parse-android-1.10.2.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="2eaa8b8ca97c915eab3883bab40e15611e5e0393">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\parse-android-1.10.2-d111126078579e569d9cd187899d6a3b430f08d0.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f8efd0096475e0daf054267b61544e10dc776503">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\classes-102c11b750a522b5f85b7ccceab312a8c56b793e.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\libs\internal_impl-22.2.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c471eaaba13ff64f6e0383d1c30a9cdc9a97efeb">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\internal_impl-22.2.1-3bdf50c232cf3973f00b78956ed64a6e006bb08a.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\22.2.1\support-annotations-22.2.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="61a0ff5c29295ec56d7e0bd3d25d95dbf71b4b2b">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\support-annotations-22.2.1-92b24a58c1050f6bf8dd6c83fd6a9ca205a493b8.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\.gradle\caches\modules-2\files-2.1\com.parse.bolts\bolts-android\1.2.1\44780c2cf98f6a3cf4e77f1234d644758b329201\bolts-android-1.2.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="44780c2cf98f6a3cf4e77f1234d644758b329201">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\bolts-android-1.2.1-812644265847f5e580861c5d415acec8db1f711b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4486e953d1f35f8ccab098b1dd67146366d5f731">
+        <dex dex="C:\Users\Jason\Desktop\backup\Development\AndroidStudioProjects\Parse-Starter-Project\ParseStarterProject\build\intermediates\pre-dexed\debug\classes-31c63daccdb31eaaf06d38e9fe6bb713456e719c.jar" />
+    </item>
+
+</items>

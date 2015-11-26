@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015-present, Parse, LLC.
+  ~ All rights reserved.
+  ~
+  ~ This source code is licensed under the BSD-style license found in the
+  ~ LICENSE file in the root directory of this source tree. An additional grant
+  ~ of patent rights can be found in the PATENTS file in the same directory.
+  -->
+<resources>
+    <string name="parse_app_id">YOUR_APPLICATION_ID</string>
+    <string name="parse_client_key">YOUR_CLIENT_KEY</string>
+
+    <string name="app_name">Parse.com Login Tutorial</string>
+
+    <string name="hello_world">Hello World!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="hello">Hello World, ParseStarterProjectActivity!</string>
+    <string name="Username">Username</string>
+    <string name="Email">Email</string>
+    <string name="Password">Password</string>
+    <string name="LoginBtn">Login</string>
+    <string name="SignupBtn">Sign Up</string>
+    <string name="LogoutBtn">Log Out</string>
+    <string name="Welcome">Welcome!</string>
+    <string name="forgotPassword">Forgot your password?</string>
+    <string name="title_activity_reset_password">Reset Password</string>
+    <string name="ResetPassword">Reset Your Password</string>
+    <string name="ResetPasswordBtn">Reset Password</string>
+    <string name="Cancel">Cancel</string>
+    <string name="txtResetPasswordDesc">
+        Please provide the email address associated with your account
+        to receive a link to reset your password.
+    </string>
+    <string name="title_activity_invitation">Invitations</string>
+
+
+    <string name="action_friendsList">Friends</string>
+
+    <!--
+        Universal
+    -->
+    <string name="whatLabel">What:</string>
+    <string name="whenLabel">When:</string>
+    <string name="whoLabel">Who:</string>
+    <string name="whereLabel">Where:</string>
+    <string name="goingLabel">Going?</string>
+    <string name="cancelButton">Cancel</string>
+
+    <!--
+        Invitation Details screen
+    -->
+    <string name="title_activity_invitation_details">Invitation Details</string>
+    <string name="responseButton">Send Response</string>
+
+    <!--
+        New invitation screen
+    -->
+    <string name="title_activity_new_invitation">New Invitation</string>
+    <string name="inviteButton">Send Invitation</string>
+    <string name="email_prompt">enter an email address</string>
+</resources>
