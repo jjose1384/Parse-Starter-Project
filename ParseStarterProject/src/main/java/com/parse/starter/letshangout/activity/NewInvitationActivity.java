@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,13 +18,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.parse.starter.R;
 import com.parse.starter.letshangout.dto.User;
 import com.parse.starter.letshangout.utils.ContactsCompletionView;
 import com.tokenautocomplete.FilteredArrayAdapter;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class NewInvitationActivity extends AppCompatActivity {
@@ -108,7 +116,7 @@ public class NewInvitationActivity extends AppCompatActivity {
                 String myFormat = "h:mm a";
                 SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-                editText_time.setText(sdf.format(myCalendar.getTime()));;
+                editText_time.setText(sdf.format(myCalendar.getTime()));
             }
         };
 
@@ -122,19 +130,15 @@ public class NewInvitationActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * resource: https://github.com/splitwise/TokenAutoComplete
+     */
     private void setFriendsTextView()
     {
-        ArrayAdapter<User> adapter;
-        User[] users = new User[]{
-                new User("Marshall Weir", "marshall@example.com"),
-                new User("Margaret Smith", "margaret@example.com"),
-                new User("Max Jordan", "max@example.com"),
-                new User("Meg Peterson", "meg@example.com"),
-                new User("Amanda Johnson", "amanda@example.com"),
-                new User("Terry Anderson", "terry@example.com")
-        };
+        final ArrayList<User> users = new ArrayList<>();
+        final ArrayAdapter<User> userArrayAdapter;
 
-        adapter = new FilteredArrayAdapter<User>(this, R.layout.user_layout, users) {
+        userArrayAdapter = new FilteredArrayAdapter<User>(this, R.layout.user_layout, users) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
@@ -158,7 +162,36 @@ public class NewInvitationActivity extends AppCompatActivity {
         };
 
         ContactsCompletionView completionView = getContactsCompletionView_who();
-        completionView.setAdapter(adapter);
+        completionView.setAdapter(userArrayAdapter);
+        completionView.setThreshold(1); // number of characters to start showing suggestions
+        completionView.allowDuplicates(false);
+
+        // load friends and set data in adapter
+        retrieveFriends(users, userArrayAdapter);
+    }
+
+    private void retrieveFriends(final ArrayList<User> users, final ArrayAdapter<User> userArrayAdapter)
+    {
+        // load fiends
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("FriendLookup");
+        query.whereEqualTo("user", ParseUser.getCurrentUser());
+        query.include("friend"); // include the friend object pointer
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> friendLookupList, ParseException e) {
+                if (e == null) {
+
+                    for (ParseObject friendLookup : friendLookupList) {
+                        ParseObject parseObjectUser = friendLookup.getParseObject("friend");
+                        User user = new User(parseObjectUser.getString("username"), parseObjectUser.getString("email"));
+                        users.add(user);
+                        userArrayAdapter.notifyDataSetChanged();
+                    }
+                } else {
+                    Log.d("FriendLookup", "Error: " + e.getMessage());
+                }
+            }
+        });
     }
 
     @Override
