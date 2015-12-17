@@ -11,13 +11,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Places;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -26,6 +32,9 @@ import com.parse.ParseUser;
 import com.parse.starter.R;
 import com.parse.starter.letshangout.dto.User;
 import com.parse.starter.letshangout.utils.ContactsCompletionView;
+import com.parse.starter.letshangout.utils.GooglePlacesAutocompleteAdapter;
+import com.parse.starter.letshangout.utils.PlaceAutocompleteAdapter;
+import com.parse.starter.letshangout.utils.WhereCompletionView;
 import com.tokenautocomplete.FilteredArrayAdapter;
 
 import java.text.SimpleDateFormat;
@@ -34,13 +43,18 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class NewInvitationActivity extends AppCompatActivity {
+public class NewInvitationActivity extends AppCompatActivity{
+
+    private static final String TAG = "NewInvitationActivity";
 
     // widgets
     private EditText editText_what;
     private EditText editText_date;
     private EditText editText_time;
     private ContactsCompletionView contactsCompletionView_who;
+    private AutoCompleteTextView autoCompleteTextView_where;
+    private AutoCompleteTextView autoCompleteTextView_where2;
+    private WhereCompletionView whereCompletionView_where;
     private Button inviteButton;
 
     // data
@@ -54,7 +68,9 @@ public class NewInvitationActivity extends AppCompatActivity {
         // set listeners
         setDatePicker();
         setTimePicker();
-        setFriendsTextView();
+        setFriendsAutocompleteTextView();
+        setWhereAutocompleteTextView3(); // todo cleanup
+
     }
 
     /**
@@ -133,7 +149,7 @@ public class NewInvitationActivity extends AppCompatActivity {
     /**
      * resource: https://github.com/splitwise/TokenAutoComplete
      */
-    private void setFriendsTextView()
+    private void setFriendsAutocompleteTextView()
     {
         final ArrayList<User> users = new ArrayList<>();
         final ArrayAdapter<User> userArrayAdapter;
@@ -157,14 +173,15 @@ public class NewInvitationActivity extends AppCompatActivity {
             @Override
             protected boolean keepObject(User user, String mask) {
                 mask = mask.toLowerCase();
-                return user.getName().toLowerCase().startsWith(mask) || user.getEmail().toLowerCase().startsWith(mask);
+                return user.getName().toLowerCase().startsWith(mask)
+                        || user.getEmail().toLowerCase().startsWith(mask);
             }
         };
 
-        ContactsCompletionView completionView = getContactsCompletionView_who();
-        completionView.setAdapter(userArrayAdapter);
-        completionView.setThreshold(1); // number of characters to start showing suggestions
-        completionView.allowDuplicates(false);
+        contactsCompletionView_who = getContactsCompletionView_who();
+        contactsCompletionView_who.setAdapter(userArrayAdapter);
+        contactsCompletionView_who.setThreshold(1); // number of characters to start showing suggestions
+        contactsCompletionView_who.allowDuplicates(false);
 
         // load friends and set data in adapter
         retrieveFriends(users, userArrayAdapter);
@@ -201,6 +218,98 @@ public class NewInvitationActivity extends AppCompatActivity {
         return true;
     }
 
+
+    /**
+     * resource:
+     *  http://examples.javacodegeeks.com/android/android-google-places-autocomplete-api-example/
+     */
+    private void setWhereAutocompleteTextView()
+    {
+        autoCompleteTextView_where = getAutoCompleteTextView_where();
+
+        autoCompleteTextView_where.setAdapter(new GooglePlacesAutocompleteAdapter(this, R.layout.list_where_item));
+        autoCompleteTextView_where.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView adapterView, View view, int position, long id) {
+                String str = (String) adapterView.getItemAtPosition(position);
+                Toast.makeText(NewInvitationActivity.this, str, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setWhereAutocompleteTextView2()
+    {
+        autoCompleteTextView_where2 = getAutoCompleteTextView_where2();
+
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, 0 /* clientId */,
+                        new GoogleApiClient.OnConnectionFailedListener()
+                        {
+                            /**
+                             * Called when the Activity could not connect to Google Play services and the auto manager
+                             * could resolve the error automatically.
+                             * In this case the API is not available and notify the user.
+                             *
+                             * @param connectionResult can be inspected to determine the cause of the failure
+                             */
+                            @Override
+                            public void onConnectionFailed(ConnectionResult connectionResult) {
+
+                                Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+                                        + connectionResult.getErrorCode());
+
+                                // TODO(Developer): Check error code and notify the user of error state and resolution.
+                                Toast.makeText(NewInvitationActivity.this,
+                                        "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                .addApi(Places.GEO_DATA_API)
+                .build();
+        PlaceAutocompleteAdapter mAdapter =
+                new PlaceAutocompleteAdapter(this, mGoogleApiClient, null,
+                null);
+
+        autoCompleteTextView_where2.setAdapter(mAdapter);
+    }
+
+    private void setWhereAutocompleteTextView3()
+    {
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, 1 /* TODO - figure out what this is */,
+                        new GoogleApiClient.OnConnectionFailedListener()
+                        {
+                            /**
+                             * Called when the Activity could not connect to Google Play services and the auto manager
+                             * could resolve the error automatically.
+                             * In this case the API is not available and notify the user.
+                             *
+                             * @param connectionResult can be inspected to determine the cause of the failure
+                             */
+                            @Override
+                            public void onConnectionFailed(ConnectionResult connectionResult) {
+
+                                Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+                                        + connectionResult.getErrorCode());
+
+                                // TODO(Developer): Check error code and notify the user of error state and resolution.
+                                Toast.makeText(NewInvitationActivity.this,
+                                        "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                .addApi(Places.GEO_DATA_API)
+                .build();
+        PlaceAutocompleteAdapter mAdapter =
+                new PlaceAutocompleteAdapter(this, mGoogleApiClient, null,
+                        null);
+
+        whereCompletionView_where = getWhereCompletionView_where();
+        whereCompletionView_where.setAdapter(mAdapter);
+        whereCompletionView_where.setThreshold(1); // number of characters to start showing suggestions
+        whereCompletionView_where.allowDuplicates(false);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -215,6 +324,7 @@ public class NewInvitationActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
     /**
      *
@@ -236,6 +346,24 @@ public class NewInvitationActivity extends AppCompatActivity {
         return (contactsCompletionView_who == null)?
                 (ContactsCompletionView)findViewById(R.id.contactsCompletionView_who):
                 contactsCompletionView_who;
+    }
+
+    private AutoCompleteTextView getAutoCompleteTextView_where() {
+        return (autoCompleteTextView_where == null)?
+                (AutoCompleteTextView)findViewById(R.id.autoCompleteTextView_where):
+                autoCompleteTextView_where;
+    }
+
+    private AutoCompleteTextView getAutoCompleteTextView_where2() {
+        return (autoCompleteTextView_where2 == null)?
+                (AutoCompleteTextView)findViewById(R.id.autoCompleteTextView_where2):
+                autoCompleteTextView_where2;
+    }
+
+    private WhereCompletionView getWhereCompletionView_where() {
+        return (whereCompletionView_where == null)?
+                (WhereCompletionView)findViewById(R.id.whereCompletionView_where):
+                whereCompletionView_where;
     }
 
     private Button getInviteButton() {

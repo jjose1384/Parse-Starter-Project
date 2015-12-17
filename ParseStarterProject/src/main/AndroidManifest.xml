@@ -25,6 +25,10 @@
         <meta-data
             android:name="com.parse.CLIENT_KEY"
             android:value="@string/parse_client_key" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDcv6v71s2QSF9cGnnCfIzhO7mwPYQ7m8c"/>
+
 
         <activity
             android:name=".letshangout.activity.MainActivity"

@@ -60,4 +60,5 @@
     <string name="title_activity_new_invitation">New Invitation</string>
     <string name="inviteButton">Send Invitation</string>
     <string name="email_prompt">enter an email address</string>
+    <string name="where_prompt">enter places</string>
 </resources>
