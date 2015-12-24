@@ -186,7 +186,7 @@ public class InvitationDetailsActivity extends AppCompatActivity {
 
                     // add event time
                     whenValue = getWhenValue();
-                    whenValue.setText(invitation.getDate("eventTime").toString());
+                    whenValue.setText(Utils.formatDate(invitation.getDate("eventTime")));
 
                     // populate invitee details
                     populateInviteeDetails(invitation);
@@ -226,7 +226,7 @@ public class InvitationDetailsActivity extends AppCompatActivity {
 
         try
         {
-            List<ParseObject> inviteeLookupList = inviteeLookupQuery.find();
+            List<ParseObject> inviteeLookupList = inviteeLookupQuery.find(); // TODO - does this need to be in background
             for (ParseObject inviteeLookup: inviteeLookupList)
             {
                 String accepted = inviteeLookup.getString("accepted");

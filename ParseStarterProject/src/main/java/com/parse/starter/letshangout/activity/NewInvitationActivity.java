@@ -3,6 +3,7 @@ package com.parse.starter.letshangout.activity;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,9 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -23,6 +22,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -32,14 +35,15 @@ import com.parse.ParseUser;
 import com.parse.starter.R;
 import com.parse.starter.letshangout.dto.User;
 import com.parse.starter.letshangout.utils.ContactsCompletionView;
-import com.parse.starter.letshangout.utils.GooglePlacesAutocompleteAdapter;
 import com.parse.starter.letshangout.utils.PlaceAutocompleteAdapter;
+import com.parse.starter.letshangout.utils.Utils;
 import com.parse.starter.letshangout.utils.WhereCompletionView;
 import com.tokenautocomplete.FilteredArrayAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,12 +56,13 @@ public class NewInvitationActivity extends AppCompatActivity{
     private EditText editText_date;
     private EditText editText_time;
     private ContactsCompletionView contactsCompletionView_who;
-    private AutoCompleteTextView autoCompleteTextView_where;
-    private AutoCompleteTextView autoCompleteTextView_where2;
     private WhereCompletionView whereCompletionView_where;
     private Button inviteButton;
+    private Button cancelButton;
 
     // data
+    private GoogleApiClient mGoogleApiClient;
+
 
 
     @Override
@@ -66,10 +71,13 @@ public class NewInvitationActivity extends AppCompatActivity{
         setContentView(R.layout.activity_new_invitation);
 
         // set listeners
+        cancelButtonListener();
+        inviteButtonListener();
+
         setDatePicker();
         setTimePicker();
         setFriendsAutocompleteTextView();
-        setWhereAutocompleteTextView3(); // todo cleanup
+        setWhereAutocompleteTextView();
 
     }
 
@@ -91,8 +99,7 @@ public class NewInvitationActivity extends AppCompatActivity{
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                String myFormat = "EEE M/d/yy";
-                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                SimpleDateFormat sdf = new SimpleDateFormat(Utils.DATE_FORMAT, Locale.US);
 
                 editText_date.setText(sdf.format(myCalendar.getTime()));
             }
@@ -129,8 +136,7 @@ public class NewInvitationActivity extends AppCompatActivity{
                 myCalendar.set(Calendar.HOUR, hourOfDay);
                 myCalendar.set(Calendar.MINUTE, minute);
 
-                String myFormat = "h:mm a";
-                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                SimpleDateFormat sdf = new SimpleDateFormat(Utils.TIME_FORMAT, Locale.US);
 
                 editText_time.setText(sdf.format(myCalendar.getTime()));
             }
@@ -218,64 +224,9 @@ public class NewInvitationActivity extends AppCompatActivity{
         return true;
     }
 
-
-    /**
-     * resource:
-     *  http://examples.javacodegeeks.com/android/android-google-places-autocomplete-api-example/
-     */
     private void setWhereAutocompleteTextView()
     {
-        autoCompleteTextView_where = getAutoCompleteTextView_where();
-
-        autoCompleteTextView_where.setAdapter(new GooglePlacesAutocompleteAdapter(this, R.layout.list_where_item));
-        autoCompleteTextView_where.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int position, long id) {
-                String str = (String) adapterView.getItemAtPosition(position);
-                Toast.makeText(NewInvitationActivity.this, str, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void setWhereAutocompleteTextView2()
-    {
-        autoCompleteTextView_where2 = getAutoCompleteTextView_where2();
-
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, 0 /* clientId */,
-                        new GoogleApiClient.OnConnectionFailedListener()
-                        {
-                            /**
-                             * Called when the Activity could not connect to Google Play services and the auto manager
-                             * could resolve the error automatically.
-                             * In this case the API is not available and notify the user.
-                             *
-                             * @param connectionResult can be inspected to determine the cause of the failure
-                             */
-                            @Override
-                            public void onConnectionFailed(ConnectionResult connectionResult) {
-
-                                Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
-                                        + connectionResult.getErrorCode());
-
-                                // TODO(Developer): Check error code and notify the user of error state and resolution.
-                                Toast.makeText(NewInvitationActivity.this,
-                                        "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                .addApi(Places.GEO_DATA_API)
-                .build();
-        PlaceAutocompleteAdapter mAdapter =
-                new PlaceAutocompleteAdapter(this, mGoogleApiClient, null,
-                null);
-
-        autoCompleteTextView_where2.setAdapter(mAdapter);
-    }
-
-    private void setWhereAutocompleteTextView3()
-    {
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 1 /* TODO - figure out what this is */,
                         new GoogleApiClient.OnConnectionFailedListener()
                         {
@@ -325,6 +276,151 @@ public class NewInvitationActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
+    private void cancelButtonListener()
+    {
+        // cancel button - navigate back to the invitation list screen
+        cancelButton = getCancelButton();
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View arg0) {
+                Intent intent = new Intent(NewInvitationActivity.this, InvitationListActivity.class);
+                startActivity(intent);
+
+                finish();
+            }
+        });
+    }
+
+
+    /**
+     * TODO:
+     *      - Need the invitation and where records to be in one transaction, don't know how to do that
+     *      - Some google places records and invitiee records don't get saved sometimes
+     */
+    private void inviteButtonListener()
+    {
+        // send invitation button
+        inviteButton = getInviteButton();
+        inviteButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View arg0) {
+                try {
+
+
+                    String what = getEditText_what().getText().toString();
+                    String date = getEditText_date().getText().toString();
+                    String time = getEditText_time().getText().toString();
+                    List<User> submittedUsers = getContactsCompletionView_who().getObjects();
+                    List<Object> submittedPlaces = getWhereCompletionView_where().getObjects();
+
+
+                    // create new Invitation record
+                    final ParseObject invitation = new ParseObject("Invitation");
+                    invitation.put("title", what);
+                    invitation.put("sender", ParseUser.getCurrentUser());
+                    Date eventTime = Utils.formatDate(date + " " + time);
+                    invitation.put("eventTime", eventTime);
+                    invitation.setACL(Utils.getPublicReadPrivateWriteACL(ParseUser.getCurrentUser()));
+                    invitation.saveInBackground(); // save the invitation object
+
+
+                    //
+                    // add sender should also get an invitee record
+                    //
+                    ParseObject inviteeLookupForSender = new ParseObject("InviteeLookup");
+                    inviteeLookupForSender.put("invitation", invitation);
+                    inviteeLookupForSender.put("invitee", ParseUser.getCurrentUser());
+
+                    // accepted is string not boolean, because boolean doesn't allow
+                    // for null values
+                    inviteeLookupForSender.put("accepted", "true"); // sender is going by default
+                    inviteeLookupForSender.
+                            setACL(Utils.getPublicReadPrivateWriteACL(ParseUser.getCurrentUser())); // acl with public read, write only by receiver
+
+                    inviteeLookupForSender.saveInBackground();
+                    // create a InviteeLookup record for each of the submitted guests
+                    for (User user: submittedUsers)
+                    {
+                        // retrieve invitee details to add to invitation
+                        ParseQuery<ParseUser> userQuery = ParseQuery.getQuery("_User");
+                        userQuery.whereEqualTo("email", user.getEmail());
+                        List<ParseUser> parseUsers = userQuery.find();
+                        // TODO - email addresses are unique, so there should be exactly one entry with a particular email
+                        // if email isn't found, there should be a way to send email notification instead of
+                        // let's hang out
+                        ParseUser parseUser = parseUsers.get(0);
+
+                        //
+                        // add invitee record
+                        //
+                        ParseObject inviteeLookup = new ParseObject("InviteeLookup");
+                        inviteeLookup.put("invitation", invitation);
+                        inviteeLookup.put("invitee", parseUser);
+                        inviteeLookup.setACL(Utils.getPublicReadPrivateWriteACL(parseUser)); // acl with public read, write only by receiver
+                        inviteeLookup.saveInBackground();
+                    }
+
+                    // create a Where record for each of the submitted places
+                    for (Object place: submittedPlaces)
+                    {
+                        // TODO - all this should only happen for a google place
+                        //        for all places only name should be added
+                        AutocompletePrediction googlePlace = (AutocompletePrediction) place;
+                        Places.GeoDataApi.getPlaceById(mGoogleApiClient, googlePlace.getPlaceId())
+                                .setResultCallback(new ResultCallback<PlaceBuffer>() {
+                                    @Override
+                                    public void onResult(PlaceBuffer places) {
+                                        if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                            final Place myPlace = places.get(0);
+
+                                            //
+                                            // add place record
+                                            //
+                                            ParseObject where = new ParseObject("Where");
+                                            where.put("name", myPlace.getName());
+                                            where.put("address", myPlace.getAddress());
+                                            where.put("googlePlaceId", myPlace.getId());
+                                            where.put("invitation", invitation);
+                                            where.setACL(Utils.getPublicReadPrivateWriteACL(ParseUser.getCurrentUser()));
+                                            where.saveInBackground();
+
+                                            Log.i(TAG, "Place found: " + myPlace.getName());
+                                        } else {
+                                            Log.e(TAG, "Place not found");
+                                        } places.release();
+                                    }
+                                });
+                    }
+
+
+                    System.out.println("What: " + what);
+                    System.out.println("When: " + date + " " + time);
+                    System.out.println("Submitted Users: " + submittedUsers);
+                    System.out.println("Submitted Places: " + submittedPlaces);
+
+                    // TODO - notify listadapter, so list of invitations will be updated(not working)
+                    InvitationListActivity.notifyInvitationsListAdapter();
+
+                    // navigate back to the invitation list screen
+                    Intent intent = new Intent(NewInvitationActivity.this, InvitationListActivity.class);
+                    startActivity(intent);
+
+                    // TODO - may cause data to not be saved, so not calling finish()
+                    // finish();
+
+                }
+                catch (ArrayIndexOutOfBoundsException e)
+                {
+                    // user with email not found
+                    // TODO - send an email notification
+                }
+                catch (ParseException e)
+                {
+                    Log.e(TAG, "Error: " + e.getMessage());
+                }
+            }
+        });
+    }
 
     /**
      *
@@ -348,18 +444,6 @@ public class NewInvitationActivity extends AppCompatActivity{
                 contactsCompletionView_who;
     }
 
-    private AutoCompleteTextView getAutoCompleteTextView_where() {
-        return (autoCompleteTextView_where == null)?
-                (AutoCompleteTextView)findViewById(R.id.autoCompleteTextView_where):
-                autoCompleteTextView_where;
-    }
-
-    private AutoCompleteTextView getAutoCompleteTextView_where2() {
-        return (autoCompleteTextView_where2 == null)?
-                (AutoCompleteTextView)findViewById(R.id.autoCompleteTextView_where2):
-                autoCompleteTextView_where2;
-    }
-
     private WhereCompletionView getWhereCompletionView_where() {
         return (whereCompletionView_where == null)?
                 (WhereCompletionView)findViewById(R.id.whereCompletionView_where):
@@ -368,5 +452,9 @@ public class NewInvitationActivity extends AppCompatActivity{
 
     private Button getInviteButton() {
         return (inviteButton == null)?(Button)findViewById(R.id.inviteButton):inviteButton;
+    }
+
+    private Button getCancelButton() {
+        return (cancelButton == null)?(Button)findViewById(R.id.cancelButton):cancelButton;
     }
 }

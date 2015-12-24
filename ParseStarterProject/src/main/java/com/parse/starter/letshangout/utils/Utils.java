@@ -1,5 +1,9 @@
 package com.parse.starter.letshangout.utils;
 
+import com.parse.ParseACL;
+import com.parse.ParseUser;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,17 +13,61 @@ import java.util.Date;
  */
 public class Utils
 {
-    private final static String appDateFormat = "h:mm a";
+    public static final String DATE_FORMAT = "EEE M/d/yy";
+    public static final String TIME_FORMAT = "h:mm a";
 
-    public static String formatDate(String date)
+    /**
+     *
+     * @return public read and write ACL
+     */
+    public static ParseACL getPublicReadWriteACL()
     {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(appDateFormat);
-        return null;
+        ParseACL publicReadWriteACL = new ParseACL();
+        publicReadWriteACL.setPublicReadAccess(true);
+        publicReadWriteACL.setPublicWriteAccess(true);
+
+        return publicReadWriteACL;
+    }
+
+    /**
+     *
+     * @return public read and owner write ACL
+     */
+    public static ParseACL getPublicReadPrivateWriteACL(ParseUser...parseUsers)
+    {
+        ParseACL publicReadPrivateWriteACL = new ParseACL();
+        publicReadPrivateWriteACL.setPublicReadAccess(true);
+
+        for (ParseUser parseUser: parseUsers)
+        {
+            publicReadPrivateWriteACL.setWriteAccess(parseUser, true);
+        }
+
+        return publicReadPrivateWriteACL;
     }
 
     public static String formatDate(Date date)
     {
-        return null;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT + " " + TIME_FORMAT);
+        return simpleDateFormat.format(date);
+    }
+
+    public static Date formatDate(String date)
+    {
+        Date returnValue = null;
+        try
+        {
+            SimpleDateFormat simpleDateFormat =
+                    new SimpleDateFormat(DATE_FORMAT + " " + TIME_FORMAT);
+
+            returnValue =  simpleDateFormat.parse(date);
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        return returnValue;
     }
 
     /**

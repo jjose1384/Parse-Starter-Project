@@ -38,7 +38,7 @@ public class InvitationListActivity extends AppCompatActivity {
 
     // data
     private List<InvitationGroup> invitationGroups;
-    private ExpandableInvitationListAdapter listAdapter;
+    private static ExpandableInvitationListAdapter listAdapter;
 
 
     @Override
@@ -206,7 +206,7 @@ public class InvitationListActivity extends AppCompatActivity {
 
         if ("w".equals(invitationType))
         {
-            // make sure 'accepted' column is always null/undefined, not empty string
+            // make sure 'accepted' column is null/undefined, not empty string
             query.whereEqualTo("accepted", null);
         }
         else if ("a".equals(invitationType))
@@ -246,6 +246,14 @@ public class InvitationListActivity extends AppCompatActivity {
         return invitationsList;
     }
 
+    /**
+     * When invitations have been updated, this will allow the
+     * invitations list to be updated
+     */
+    public static void notifyInvitationsListAdapter()
+    {
+        listAdapter.notifyDataSetChanged();
+    }
 
     /*
      * private accessors for widgets
