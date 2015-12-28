@@ -49,7 +49,7 @@ import java.util.Locale;
 
 public class NewInvitationActivity extends AppCompatActivity{
 
-    private static final String TAG = "NewInvitationActivity";
+    private static final String TAG = "NewInvitationAct.";
 
     // widgets
     private EditText editText_what;
@@ -61,7 +61,7 @@ public class NewInvitationActivity extends AppCompatActivity{
     private Button cancelButton;
 
     // data
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient _mGoogleApiClient;
 
 
 
@@ -226,7 +226,7 @@ public class NewInvitationActivity extends AppCompatActivity{
 
     private void setWhereAutocompleteTextView()
     {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        _mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 1 /* TODO - figure out what this is */,
                         new GoogleApiClient.OnConnectionFailedListener()
                         {
@@ -252,7 +252,7 @@ public class NewInvitationActivity extends AppCompatActivity{
                 .addApi(Places.GEO_DATA_API)
                 .build();
         PlaceAutocompleteAdapter mAdapter =
-                new PlaceAutocompleteAdapter(this, mGoogleApiClient, null,
+                new PlaceAutocompleteAdapter(this, _mGoogleApiClient, null,
                         null);
 
         whereCompletionView_where = getWhereCompletionView_where();
@@ -296,6 +296,8 @@ public class NewInvitationActivity extends AppCompatActivity{
      * TODO:
      *      - Need the invitation and where records to be in one transaction, don't know how to do that
      *      - Some google places records and invitiee records don't get saved sometimes
+     *      - look at saveAllinBackground()
+     *          - http://stackoverflow.com/questions/26768156/transaction-management-in-parse-com
      */
     private void inviteButtonListener()
     {
@@ -366,7 +368,7 @@ public class NewInvitationActivity extends AppCompatActivity{
                         // TODO - all this should only happen for a google place
                         //        for all places only name should be added
                         AutocompletePrediction googlePlace = (AutocompletePrediction) place;
-                        Places.GeoDataApi.getPlaceById(mGoogleApiClient, googlePlace.getPlaceId())
+                        Places.GeoDataApi.getPlaceById(_mGoogleApiClient, googlePlace.getPlaceId())
                                 .setResultCallback(new ResultCallback<PlaceBuffer>() {
                                     @Override
                                     public void onResult(PlaceBuffer places) {

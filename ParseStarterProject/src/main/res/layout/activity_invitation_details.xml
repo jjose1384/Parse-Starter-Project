@@ -130,6 +130,27 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/linearLayout_whereOther"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"/>
+
+            <AutoCompleteTextView
+                android:id="@+id/autocompleteTextView_whereOther"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:enabled="false"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -151,8 +172,6 @@
                 android:layout_weight="1"
                 android:layout_marginRight="30dp"
                 android:text="@string/cancelButton" />
-
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

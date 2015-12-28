@@ -7,19 +7,30 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.starter.R;
+import com.parse.starter.letshangout.utils.PlaceAutocompleteAdapter;
 import com.parse.starter.letshangout.utils.Utils;
 
 import java.util.ArrayList;
@@ -29,6 +40,8 @@ import java.util.Map;
 
 public class InvitationDetailsActivity extends AppCompatActivity {
 
+    private static final String TAG = "InvitationDetailsAct.";
+
     // widgets
     private Button cancelButton;
     private Button responseButton;
@@ -37,6 +50,7 @@ public class InvitationDetailsActivity extends AppCompatActivity {
     private TextView whenValue;
     private TextView whoValue;
     private RadioGroup whereRadioGroup;
+    private AutoCompleteTextView autocompleteTextView_whereOther;
 
     // data
     private ParseObject _currentInvitation;
@@ -44,6 +58,11 @@ public class InvitationDetailsActivity extends AppCompatActivity {
     private Map<String, List<ParseObject>> _inviteeListMap = new HashMap<>(); // maps accepted, declined and waiting lists
     private Map<String, Integer> _whereCount = new HashMap<>(); // maps where object id to number of votes
     private List<ParseObject> _whereList = new ArrayList<>();
+
+    // google autocomplete
+    private GoogleApiClient _mGoogleApiClient;
+    private PlaceAutocompleteAdapter _mAdapter;
+    private String _suggestedPlaceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +75,11 @@ public class InvitationDetailsActivity extends AppCompatActivity {
         populateInvitationDetails(invitationObjectId);
 
         // set listeners on buttons
+        radioButtonChangeListener();
         goingSwitchChangeListener();
         cancelButtonListener();
         responseButtonListener();
+        setWhereAutocompleteTextView();
 
     }
 
@@ -79,10 +100,36 @@ public class InvitationDetailsActivity extends AppCompatActivity {
     }
 
     /**
+     * enables or disables other editText based on whether the 'Other' radio option
+     * is selected
+     */
+    private void radioButtonChangeListener()
+    {
+        // radio button group
+        whereRadioGroup = getWhereRadioGroup();
+        whereRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                autocompleteTextView_whereOther = getAutocompleteTextView_whereOther();
+
+                // checkedId is the RadioButton selected
+                if (checkedId == (group.getChildCount() - 1)) // 'Other' option is the last one in the group
+                {
+                    // 'other' is selected
+                    enableDisableOtherEditText(true);
+                } else {
+                    // 'other' is not selected
+                    enableDisableOtherEditText(false);
+                }
+
+            }
+        });
+    }
+
+    /**
      *  saves the going response as well as the where selection if one has been made
      */
-    private void responseButtonListener()
-    {
+    private void responseButtonListener() {
         // response button
         responseButton = getResponseButton();
         responseButton.setOnClickListener(new View.OnClickListener() {
@@ -100,10 +147,51 @@ public class InvitationDetailsActivity extends AppCompatActivity {
 
                                 whereRadioGroup = getWhereRadioGroup();
                                 int selectedRadioButtonIndex = whereRadioGroup.getCheckedRadioButtonId();
-                                if (selectedRadioButtonIndex != -1) // -1 = no radio button selected
+
+                                if (selectedRadioButtonIndex == (whereRadioGroup.getChildCount()-1))
+                                // last radio button is selected, meaning the other option is selected
                                 {
-                                    _currentInviteeLookup.put("whereSelection",
-                                            _whereList.get(selectedRadioButtonIndex));
+                                    /*
+                                    Issue a request to the Places Geo Data API to retrieve a Place object with additional
+                                    details about the place.
+                                    TODO - This request for details may not be necessary. Could reduce total requests to google api
+                                    */
+                                    Places.GeoDataApi.getPlaceById(_mGoogleApiClient, _suggestedPlaceId)
+                                    .setResultCallback(new ResultCallback<PlaceBuffer>() {
+                                        @Override
+                                        public void onResult(PlaceBuffer places) {
+                                            if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                                                // get place details and save in variable to be used
+                                                // when response is sent
+                                                final Place suggestedPlace = places.get(0);
+
+                                                // add the new place suggestion
+                                                ParseObject where = new ParseObject("Where");
+                                                where.put("name", suggestedPlace.getName());
+                                                where.put("address", suggestedPlace.getAddress());
+                                                where.put("googlePlaceId", suggestedPlace.getId());
+                                                where.put("invitation", _currentInvitation);
+                                                where.setACL(Utils.getPublicReadPrivateWriteACL(ParseUser.getCurrentUser()));
+                                                where.saveInBackground();
+
+                                                _currentInviteeLookup.put("whereSelection", where); // add the new where record as user's selection
+
+                                                Log.i(TAG, "Place found: " + suggestedPlace.getName());
+                                            } else {
+                                                Log.e(TAG, "Place not found");
+                                            }
+                                            places.release();
+                                        }
+                                    });
+                                }
+                                else if (selectedRadioButtonIndex != -1) // -1 = no radio button selected
+                                {
+                                    _currentInviteeLookup.put("whereSelection", _whereList.get(selectedRadioButtonIndex));
+                                }
+
+                                else
+                                {
+                                    _currentInviteeLookup.remove("whereSelection"); // remove selection
                                 }
                             }
                             else
@@ -132,8 +220,7 @@ public class InvitationDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void goingSwitchChangeListener()
-    {
+    private void goingSwitchChangeListener() {
         // going switch
         goingSwitch = getGoingSwitch();
         goingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -145,6 +232,77 @@ public class InvitationDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void setWhereAutocompleteTextView()
+    {
+        _mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, 1 /* TODO - figure out what this is */,
+                        new GoogleApiClient.OnConnectionFailedListener()
+                        {
+                            /**
+                             * Called when the Activity could not connect to Google Play services and the auto manager
+                             * could resolve the error automatically.
+                             * In this case the API is not available and notify the user.
+                             *
+                             * @param connectionResult can be inspected to determine the cause of the failure
+                             */
+                            @Override
+                            public void onConnectionFailed(ConnectionResult connectionResult) {
+
+                                Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+                                        + connectionResult.getErrorCode());
+
+                                // TODO(Developer): Check error code and notify the user of error state and resolution.
+                                Toast.makeText(InvitationDetailsActivity.this, "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                .addApi(Places.GEO_DATA_API)
+                .build();
+        _mAdapter =
+                new PlaceAutocompleteAdapter(this, _mGoogleApiClient, null,
+                        null);
+
+
+        autocompleteTextView_whereOther = getAutocompleteTextView_whereOther();
+        // Register a listener that receives callbacks when a suggestion has been selected
+        autocompleteTextView_whereOther.setOnItemClickListener(mAutocompleteClickListener);
+        autocompleteTextView_whereOther.setAdapter(_mAdapter);
+        autocompleteTextView_whereOther.setThreshold(1); // number of characters to start showing suggestions
+    }
+
+    /**
+     * Listener that handles selections from suggestions from the AutoCompleteTextView that
+     * displays Place suggestions.
+     * Gets the place id of the selected item and issues a request to the Places Geo Data API
+     * to retrieve more details about the place.
+     *
+     * @see com.google.android.gms.location.places.GeoDataApi#getPlaceById(com.google.android.gms.common.api.GoogleApiClient,
+     * String...)
+     */
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            /*
+             Retrieve the place ID of the selected item from the Adapter.
+             The adapter stores each Place suggestion in a AutocompletePrediction from which we
+             read the place ID and title.
+              */
+            final AutocompletePrediction item = _mAdapter.getItem(position);
+            _suggestedPlaceId = item.getPlaceId();
+            final CharSequence primaryText = item.getPrimaryText(null);
+
+            // set the primary text as the where text
+            getAutocompleteTextView_whereOther().setText(primaryText);
+
+            Log.i(TAG, "Autocomplete item selected: " + primaryText);
+
+
+            Toast.makeText(getApplicationContext(), "Clicked: " + primaryText,
+                    Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Called getPlaceById to get Place details for " + _suggestedPlaceId);
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -171,8 +329,7 @@ public class InvitationDetailsActivity extends AppCompatActivity {
     /*
      * Populates the invitation details based on object id of invitation
      */
-    private void populateInvitationDetails(String invitationObjectId)
-    {
+    private void populateInvitationDetails(String invitationObjectId) {
         ParseQuery<ParseObject> invitationQuery = ParseQuery.getQuery("Invitation");
 
         invitationQuery.getInBackground(invitationObjectId, new GetCallback<ParseObject>() {
@@ -326,7 +483,7 @@ public class InvitationDetailsActivity extends AppCompatActivity {
     * resource:
     *   - dynamically loading radio buttons: http://stackoverflow.com/questions/6646442/creating-radiobuttons-programmatically
     */
-    private void populateLocationDetails(ParseObject invitation)
+    private void  populateLocationDetails(ParseObject invitation)
     {
 
         // retrieve where locations for the particular invitation
@@ -338,7 +495,8 @@ public class InvitationDetailsActivity extends AppCompatActivity {
             whereRadioGroup = getWhereRadioGroup();
 
             _whereList = whereQuery.find();
-            for (int i = 0; i < _whereList.size(); i++)
+            int i = 0;
+            for (; i < _whereList.size(); i++)
             {
                 RadioButton radioButton = new RadioButton(this);
                 int whereCount = Utils.nullToZero(_whereCount.get(_whereList.get(i).getObjectId()));
@@ -355,9 +513,15 @@ public class InvitationDetailsActivity extends AppCompatActivity {
                     // populate where selection
                     radioButton.setChecked(true);
                 }
-
             }
 
+            // adding the 'other' radio button option
+            // TODO - this should only happen if the inviter allows? or maybe the options
+            //        are a core part of this app
+            RadioButton radioButton = new RadioButton(this);
+            radioButton.setId(i); // other will be the last option
+            radioButton.setText("Other");
+            whereRadioGroup.addView(radioButton);
         }
         catch (ParseException e)
         {
@@ -387,6 +551,29 @@ public class InvitationDetailsActivity extends AppCompatActivity {
                 whereRadioGroup.getChildAt(i).setEnabled(false);
             }
         }
+    }
+
+    /**
+     * This method is used to enable or disable and clear the
+     * where other text field
+     *
+     * @param enable
+     */
+    private void enableDisableOtherEditText(boolean enable)
+    {
+        autocompleteTextView_whereOther = getAutocompleteTextView_whereOther();
+        if(enable)
+        {
+            autocompleteTextView_whereOther.setHint(R.string.where_prompt_new_suggestion);
+            autocompleteTextView_whereOther.setEnabled(true);
+        }
+        else
+        {
+            autocompleteTextView_whereOther.setText("");
+            autocompleteTextView_whereOther.setHint(null);
+            autocompleteTextView_whereOther.setEnabled(false);
+        }
+
     }
 
     /*
@@ -419,5 +606,11 @@ public class InvitationDetailsActivity extends AppCompatActivity {
 
     private RadioGroup getWhereRadioGroup() {
         return (whereRadioGroup == null)?(RadioGroup) findViewById(R.id.whereRadioGroup):whereRadioGroup;
+    }
+
+    private AutoCompleteTextView getAutocompleteTextView_whereOther() {
+        return (autocompleteTextView_whereOther == null)?
+                (AutoCompleteTextView) findViewById(R.id.autocompleteTextView_whereOther):
+                autocompleteTextView_whereOther;
     }
 }
