@@ -27,8 +27,7 @@
             android:value="@string/parse_client_key" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDcv6v71s2QSF9cGnnCfIzhO7mwPYQ7m8c"/>
-
+            android:value="AIzaSyDcv6v71s2QSF9cGnnCfIzhO7mwPYQ7m8c" />
 
         <activity
             android:name=".letshangout.activity.MainActivity"
@@ -66,6 +65,14 @@
         <activity
             android:name=".letshangout.activity.NewInvitationActivity"
             android:label="@string/title_activity_new_invitation"
+            android:parentActivityName=".letshangout.activity.InvitationListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.parse.starter.letshangout.activity.InvitationListActivity" />
+        </activity>
+        <activity
+            android:name=".letshangout.activity.FriendListActivity"
+            android:label="@string/title_activity_friend_list"
             android:parentActivityName=".letshangout.activity.InvitationListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

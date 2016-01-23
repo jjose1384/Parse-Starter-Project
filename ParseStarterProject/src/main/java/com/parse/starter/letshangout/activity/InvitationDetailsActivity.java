@@ -522,6 +522,11 @@ public class InvitationDetailsActivity extends AppCompatActivity {
             radioButton.setId(i); // other will be the last option
             radioButton.setText("Other");
             whereRadioGroup.addView(radioButton);
+
+
+            // disable autocomplete edit text by default
+            // needs to be put here after all the radio options have been created
+            enableDisableOtherEditText(false);
         }
         catch (ParseException e)
         {

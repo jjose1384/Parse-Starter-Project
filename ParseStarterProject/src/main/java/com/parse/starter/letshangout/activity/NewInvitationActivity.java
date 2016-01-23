@@ -198,7 +198,9 @@ public class NewInvitationActivity extends AppCompatActivity{
         // load fiends
         ParseQuery<ParseObject> query = ParseQuery.getQuery("FriendLookup");
         query.whereEqualTo("user", ParseUser.getCurrentUser());
+        query.whereEqualTo("accepted", true); // mutually accepted friends
         query.include("friend"); // include the friend object pointer
+
 
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> friendLookupList, ParseException e) {

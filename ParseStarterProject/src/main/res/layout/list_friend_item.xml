@@ -10,10 +10,11 @@
         android:orientation="horizontal">
 
         <LinearLayout
+            android:id="@+id/linearLayout_expandCollapseButtons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
-            android:onClick="expandCollapseInvitationDetails">
+            android:onClick="expandCollapseFriendRequest">
             <ImageView
                 android:id="@+id/imageView_collapse"
                 android:layout_width="wrap_content"
@@ -30,10 +31,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout_invitationDetails"
+            android:id="@+id/linearLayout_friendRequest"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/lblListItem"
                 android:layout_width="fill_parent"
@@ -44,12 +46,43 @@
                 android:text="test"
                 android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
 
-            <AnalogClock
-                android:id="@+id/analogClock_test"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/linearLayout_responseButtons"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone">
 
+                <!-- hidden parameter populated with userObjectId -->
+                <TextView
+                    android:id="@+id/textView_userObjectId"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:paddingBottom="5dp"
+                    android:text="userObjectId"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/button_acceptFriendRequest"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="30dp"
+                    android:text="@string/button_acceptFriendRequest"
+                    android:textColor="#339900"
+                    android:onClick="acceptFriendRequest"/>
+
+                <Button
+                    android:id="@+id/button_rejectFriendRequest"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginRight="30dp"
+                    android:text="@string/button_rejectFriendRequest"
+                    android:textColor="#FF0000"
+                    android:onClick="rejectFriendRequest"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

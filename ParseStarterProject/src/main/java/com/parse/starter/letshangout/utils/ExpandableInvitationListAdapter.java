@@ -32,7 +32,7 @@ public class ExpandableInvitationListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getChild(int groupPosition, int childPosition)
     {
-        return (_invitationGroups.get(groupPosition)).getInvitationDetails().get(childPosition);
+        return (_invitationGroups.get(groupPosition)).getInvitationDetailsList().get(childPosition);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ExpandableInvitationListAdapter extends BaseExpandableListAdapter
     @Override
     public int getChildrenCount(int groupPosition)
     {
-        return (_invitationGroups.get(groupPosition)).getInvitationDetails().size();
+        return (_invitationGroups.get(groupPosition)).getInvitationDetailsList().size();
     }
 
     @Override

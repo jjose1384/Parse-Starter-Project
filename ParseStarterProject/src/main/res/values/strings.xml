@@ -35,9 +35,6 @@
     </string>
     <string name="title_activity_invitation">Invitations</string>
 
-
-    <string name="action_friendsList">Friends</string>
-
     <!--
         Universal
     -->
@@ -49,10 +46,16 @@
     <string name="cancelButton">Cancel</string>
 
     <!--
+        Invitation List screen
+    -->
+    <string name="action_friendsList">Friends</string>
+
+    <!--
         Invitation Details screen
     -->
     <string name="title_activity_invitation_details">Invitation Details</string>
     <string name="responseButton">Send Response</string>
+    <string name="where_prompt_new_suggestion">suggest another place</string>
 
     <!--
         New invitation screen
@@ -61,5 +64,13 @@
     <string name="inviteButton">Send Invitation</string>
     <string name="email_prompt">enter an email address</string>
     <string name="where_prompt">enter places</string>
-    <string name="where_prompt_new_suggestion">suggest another place</string>
+
+
+    <!--
+        Friends List screen
+    -->
+    <string name="title_activity_friend_list">Friends</string>
+    <string name="action_addFriend">Add Friend</string>
+    <string name="button_acceptFriendRequest">Accept</string>
+    <string name="button_rejectFriendRequest">Reject</string>
 </resources>

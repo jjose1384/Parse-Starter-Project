@@ -25,11 +25,11 @@ public class InvitationGroup {
         this.headerTitle = headerTitle;
     }
 
-    public List<Map<String, Object>> getInvitationDetails() {
+    public List<Map<String, Object>> getInvitationDetailsList() {
         return invitationDetailsList;
     }
 
-    public void setInvitationDetails(List<Map<String, Object>> invitationDetailsList) {
+    public void setInvitationDetailsList(List<Map<String, Object>> invitationDetailsList) {
         this.invitationDetailsList = invitationDetailsList;
     }
 }

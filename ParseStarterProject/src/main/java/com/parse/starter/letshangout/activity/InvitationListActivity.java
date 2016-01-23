@@ -8,8 +8,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AnalogClock;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -30,6 +32,10 @@ import java.util.Map;
  * resource: http://www.tutorialsbuzz.com/2014/07/custom-expandable-listview-image-text.html
  */
 public class InvitationListActivity extends AppCompatActivity {
+
+    private static final String WAITING_INVITATIONS = "w";
+    private static final String ACCEPTED_INVITATIONS = "a";
+    private static final String DECLINED_INVITATIONS = "d";
 
     // widgets
     private Button logout; // TODO - remove
@@ -78,14 +84,14 @@ public class InvitationListActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Intent intent = new Intent(InvitationListActivity.this, InvitationDetailsActivity.class);
-                intent.putExtra("invitationObjectId", (String) invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("invitationObjectId"));
+                intent.putExtra("invitationObjectId", (String) invitationGroups.get(groupPosition).getInvitationDetailsList().get(childPosition).get("invitationObjectId"));
                 startActivity(intent);
 
-// details of parameters being passed
-//                Toast.makeText(getApplicationContext(), invitationGroups.get(groupPosition).getHeaderTitle() + " : " +
-//                        invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("title") + " : " +
-//                        invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("eventTime") + " : " +
-//                        invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("invitationObjectId"), Toast.LENGTH_LONG).show();
+                // details of parameters being passed
+                //                Toast.makeText(getApplicationContext(), invitationGroups.get(groupPosition).getHeaderTitle() + " : " +
+                //                        invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("title") + " : " +
+                //                        invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("eventTime") + " : " +
+                //                        invitationGroups.get(groupPosition).getInvitationDetails().get(childPosition).get("invitationObjectId"), Toast.LENGTH_LONG).show();
                 return false;
             }
         });
@@ -151,10 +157,10 @@ public class InvitationListActivity extends AppCompatActivity {
             // navigate to the new invitation screen
             Intent intent = new Intent(
                     InvitationListActivity.this,
-                    NewInvitationActivity.class);
+                    FriendListActivity.class);
 
             startActivity(intent);
-            finish();
+            // finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -179,13 +185,13 @@ public class InvitationListActivity extends AppCompatActivity {
 
 
         // Populate list of waiting invitations
-        waitingInvitations.setInvitationDetails(loadInvitationList("w"));
+        waitingInvitations.setInvitationDetailsList(loadInvitationList(WAITING_INVITATIONS));
 
         // Populate list of accepted invitations
-        acceptedInvitations.setInvitationDetails(loadInvitationList("a"));
+        acceptedInvitations.setInvitationDetailsList(loadInvitationList(ACCEPTED_INVITATIONS));
 
         // populate list of declined invitations
-        declinedInvitations.setInvitationDetails(loadInvitationList("d"));
+        declinedInvitations.setInvitationDetailsList(loadInvitationList(DECLINED_INVITATIONS));
 
         invitationGroups.add(0, waitingInvitations);
         invitationGroups.add(1, acceptedInvitations);
@@ -204,16 +210,16 @@ public class InvitationListActivity extends AppCompatActivity {
         query.whereEqualTo("invitee", ParseUser.getCurrentUser());
         query.include("invitation"); // include the invitation object pointer
 
-        if ("w".equals(invitationType))
+        if (WAITING_INVITATIONS.equals(invitationType))
         {
             // make sure 'accepted' column is null/undefined, not empty string
             query.whereEqualTo("accepted", null);
         }
-        else if ("a".equals(invitationType))
+        else if (ACCEPTED_INVITATIONS.equals(invitationType))
         {
             query.whereEqualTo("accepted", "true");
         }
-        else if ("d".equals(invitationType))
+        else if (DECLINED_INVITATIONS.equals(invitationType))
         {
             query.whereEqualTo("accepted", "false");
         }
@@ -253,6 +259,29 @@ public class InvitationListActivity extends AppCompatActivity {
     public static void notifyInvitationsListAdapter()
     {
         listAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * resource: https://tsicilian.wordpress.com/2013/09/02/android-tips-expandablecollapsible-views/
+     */
+    public void expandCollapseInvitationDetails(View v){
+
+        ImageView expand = (ImageView)v.findViewById(R.id.imageView_expand);
+        ImageView collapse = (ImageView)v.findViewById(R.id.imageView_collapse);
+        AnalogClock analogClock_test = // TODO - replace
+                (AnalogClock)(((View)v.getParent()).findViewById(R.id.linearLayout_invitationDetails)).findViewById(R.id.analogClock_test);
+        if (expand.isShown())
+        {
+            expand.setVisibility(View.GONE);
+            collapse.setVisibility(View.VISIBLE);
+            analogClock_test.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            expand.setVisibility(View.VISIBLE);
+            collapse.setVisibility(View.GONE);
+            analogClock_test.setVisibility(View.GONE);
+        }
     }
 
     /*

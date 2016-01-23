@@ -101,7 +101,9 @@
                     android:layout_height="wrap_content"
                     android:textOff="No"
                     android:textOn="Yes"
-                    android:id="@+id/goingSwitch"/>
+                    android:id="@+id/goingSwitch">
+                    <requestFocus/>
+                </Switch>
             </LinearLayout>
 
         </LinearLayout>
@@ -146,8 +148,7 @@
                 android:id="@+id/autocompleteTextView_whereOther"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="7"
-                android:enabled="false"/>
+                android:layout_weight="7"/>
         </LinearLayout>
 
         <LinearLayout
